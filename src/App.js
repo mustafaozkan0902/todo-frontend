@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+// Buraya ekliyoruz:
+const API_URL = "https://todo-flask-duf3.onrender.com/api/tasks";
+
 function App() {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
@@ -10,18 +13,18 @@ function App() {
   }, []);
 
   const fetchTasks = async () => {
-    const res = await axios.get("https://todo-flask-duf3.onrender.com/api/tasks");
+    const res = await axios.get(API_URL); // burası artık değişken
     setTasks(res.data);
   };
 
   const addTask = async () => {
-    await axios.post("https://todo-flask-duf3.onrender.com/api/tasks", { title });
+    await axios.post(API_URL, { title }); // burası da değişken
     setTitle("");
     fetchTasks();
   };
 
   const updateTask = async (id, status) => {
-    await axios.put(`https://todo-flask-duf3.onrender.com/api/tasks/${id}`, { status });
+    await axios.put(`${API_URL}/${id}`, { status }); // burası da değişken
     fetchTasks();
   };
 
