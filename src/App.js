@@ -7,7 +7,6 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
 
-  // Görevleri çekme
   const fetchTasks = async () => {
     try {
       const res = await axios.get(API_URL);
@@ -17,14 +16,12 @@ function App() {
     }
   };
 
-  // Başlangıçta ve 5 saniyede bir çek
   useEffect(() => {
     fetchTasks();
     const interval = setInterval(fetchTasks, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // Yeni görev ekle
   const addTask = async () => {
     if (!title.trim()) return;
     await axios.post(API_URL, { title });
@@ -32,20 +29,18 @@ function App() {
     fetchTasks();
   };
 
-  // Görev durumunu güncelle
   const updateTask = async (id, status) => {
     await axios.put(`${API_URL}/${id}`, { status });
     fetchTasks();
   };
 
-  // Görevi sil
   const deleteTask = async (id) => {
     await axios.delete(`${API_URL}/${id}`);
     fetchTasks();
   };
 
-  // Tamamlanan ve tamamlanmayan görevleri ayır
-  const pendingTasks = tasks.filter(t => t.status !== "tamamlandı");
+  const pendingTasks = tasks.filter(t => t.status === "onay_bekliyor");
+  const inProgressTasks = tasks.filter(t => t.status === "devam");
   const completedTasks = tasks.filter(t => t.status === "tamamlandı");
 
   return (
@@ -62,24 +57,35 @@ function App() {
         <button onClick={addTask}>Ekle</button>
       </div>
 
-      <h2>Onay Bekleyen / Devam Eden</h2>
+      <h2>Onay Bekleyen Görevler</h2>
       <ul>
-        {pendingTasks.map((t) => (
+        {pendingTasks.map(t => (
           <li key={t.id} style={{ marginBottom: 5 }}>
             {t.title} - {t.status}{" "}
-            <button onClick={() => updateTask(t.id, "onay_bekliyor")}>Onay Bekliyor</button>{" "}
-            <button onClick={() => updateTask(t.id, "tamamlandı")}>Tamamlandı</button>{" "}
+            <button onClick={() => updateTask(t.id, "devam")}>Onaya Geçir</button>{" "}
             <button onClick={() => deleteTask(t.id)}>Sil</button>
           </li>
         ))}
       </ul>
 
-      <h2>Tamamlananlar</h2>
+      <h2>Devam Eden Görevler</h2>
       <ul>
-        {completedTasks.map((t) => (
+        {inProgressTasks.map(t => (
           <li key={t.id} style={{ marginBottom: 5 }}>
             {t.title} - {t.status}{" "}
+            <button onClick={() => updateTask(t.id, "tamamlandı")}>Tamamla</button>{" "}
             <button onClick={() => updateTask(t.id, "onay_bekliyor")}>Geri Al</button>{" "}
+            <button onClick={() => deleteTask(t.id)}>Sil</button>
+          </li>
+        ))}
+      </ul>
+
+      <h2>Tamamlanan Görevler</h2>
+      <ul>
+        {completedTasks.map(t => (
+          <li key={t.id} style={{ marginBottom: 5 }}>
+            {t.title} - {t.status}{" "}
+            <button onClick={() => updateTask(t.id, "devam")}>Geri Al</button>{" "}
             <button onClick={() => deleteTask(t.id)}>Sil</button>
           </li>
         ))}
